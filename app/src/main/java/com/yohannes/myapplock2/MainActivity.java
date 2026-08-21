@@ -46,13 +46,19 @@ public class MainActivity extends Activity {
         layout.setBackgroundColor(Color.WHITE);
 
         TextView title = new TextView(this);
-        title.setText("🔐 Create PIN");
-        title.setTextSize(28);
+        title.setText("🔐 MyAppLock2");
+        title.setTextSize(30);
         title.setTextColor(Color.BLACK);
         title.setGravity(Gravity.CENTER);
 
+        TextView message = new TextView(this);
+        message.setText("Create your 4-digit PIN");
+        message.setTextSize(20);
+        message.setTextColor(Color.DKGRAY);
+        message.setGravity(Gravity.CENTER);
+
         EditText pin = new EditText(this);
-        pin.setHint("Enter 4-digit PIN");
+        pin.setHint("4-digit PIN");
         pin.setInputType(2);
         pin.setGravity(Gravity.CENTER);
         pin.setTextSize(20);
@@ -60,44 +66,55 @@ public class MainActivity extends Activity {
         Button save = new Button(this);
         save.setText("Save PIN");
 
-        save.setOnClickListener(v -> {
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-            String value = pin.getText().toString();
+                String value = pin.getText().toString();
 
-            if (value.length() != 4) {
+                if (value.length() != 4) {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "PIN must be 4 digits",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
+
+                prefs.edit()
+                        .putString("PIN", value)
+                        .apply();
+
                 Toast.makeText(
-                    MainActivity.this,
-                    "PIN must be 4 digits",
-                    Toast.LENGTH_SHORT
+                        MainActivity.this,
+                        "PIN saved successfully!",
+                        Toast.LENGTH_SHORT
                 ).show();
-                return;
+
+                showMainScreen();
             }
-
-            prefs.edit()
-                    .putString("PIN", value)
-                    .apply();
-
-            showMainScreen();
         });
 
         layout.addView(title);
+        layout.addView(message);
 
-        LinearLayout.LayoutParams p =
+        LinearLayout.LayoutParams pinParams =
                 new LinearLayout.LayoutParams(
-                        500,
+                        LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        p.topMargin = 40;
-        layout.addView(pin, p);
+        pinParams.topMargin = 30;
+        layout.addView(pin, pinParams);
 
-        p = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams buttonParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
 
-        p.topMargin = 25;
-        layout.addView(save, p);
+        buttonParams.topMargin = 20;
+        layout.addView(save, buttonParams);
 
         setContentView(layout);
     }
@@ -121,11 +138,14 @@ public class MainActivity extends Activity {
         Button usageButton = new Button(this);
         usageButton.setText("⚙️ Usage Access Settings");
 
-        usageButton.setOnClickListener(v ->
+        usageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 startActivity(new Intent(
                         Settings.ACTION_USAGE_ACCESS_SETTINGS
-                ))
-        );
+                ));
+            }
+        });
 
         root.addView(usageButton);
 
@@ -189,45 +209,51 @@ public class MainActivity extends Activity {
 
             Button lockButton = new Button(this);
 
-            boolean locked =
-                    prefs.getBoolean(
-                            "LOCK_" + packageName,
-                            false
-                    );
+            boolean locked = prefs.getBoolean(
+                    "LOCK_" + packageName,
+                    false
+            );
 
             lockButton.setText(
                     locked ? "🔓 Unlock" : "🔒 Lock"
             );
 
-            lockButton.setOnClickListener(v -> {
+            lockButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                boolean current =
-                        prefs.getBoolean(
-                                "LOCK_" + packageName,
-                                false
-                        );
+                            boolean current =
+                                    prefs.getBoolean(
+                                            "LOCK_" + packageName,
+                                            false
+                                    );
 
-                prefs.edit()
-                        .putBoolean(
-                                "LOCK_" + packageName,
-                                !current
-                        )
-                        .apply();
+                            prefs.edit()
+                                    .putBoolean(
+                                            "LOCK_" + packageName,
+                                            !current
+                                    )
+                                    .apply();
 
-                lockButton.setText(
-                        !current
-                                ? "🔓 Unlock"
-                                : "🔒 Lock"
-                );
+                            lockButton.setText(
+                                    !current
+                                            ? "🔓 Unlock"
+                                            : "🔒 Lock"
+                            );
 
-                Toast.makeText(
-                        MainActivity.this,
-                        !current
-                                ? name.getText() + " locked"
-                                : name.getText() + " unlocked",
-                        Toast.LENGTH_SHORT
-                ).show();
-            });
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    !current
+                                            ? name.getText()
+                                                + " locked"
+                                            : name.getText()
+                                                + " unlocked",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
 
             row.addView(
                     name,
@@ -243,4 +269,4 @@ public class MainActivity extends Activity {
             appList.addView(row);
         }
     }
-                     }
+                    }

@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-
     <application
         android:theme="@style/AppTheme"
         android:label="MyAppLock2"
-        android:allowBackup="true"
-        android:supportsRtl="true">
+        android:allowBackup="true">
 
         <activity
             android:name=".MainActivity"
@@ -19,6 +16,26 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name=".PinActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".AppLockAccessibilityService"
+            android:label="MyAppLock2"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+
+        </service>
 
     </application>
 

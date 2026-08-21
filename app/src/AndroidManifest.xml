@@ -1,29 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<activity
+    android:name=".PinActivity"
+    android:exported="false" />
 
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+<service
+    android:name=".AppLockAccessibilityService"
+    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+    android:exported="false">
 
-    <application
-        android:theme="@style/AppTheme"
-        android:label="MyAppLock2"
-        android:allowBackup="true"
-        android:supportsRtl="true">
+    <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService" />
+    </intent-filter>
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+    <meta-data
+        android:name="android.accessibilityservice"
+        android:resource="@xml/accessibility_service_config" />
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
-
-        <service
-            android:name=".LockService"
-            android:exported="false" />
-
-    </application>
-
-</manifest>
+</service>

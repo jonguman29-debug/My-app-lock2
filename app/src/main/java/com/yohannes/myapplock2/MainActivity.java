@@ -8,15 +8,19 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -85,12 +89,6 @@ public class MainActivity extends Activity {
                         .putString("PIN", value)
                         .apply();
 
-                Toast.makeText(
-                        MainActivity.this,
-                        "PIN saved successfully!",
-                        Toast.LENGTH_SHORT
-                ).show();
-
                 showMainScreen();
             }
         });
@@ -123,7 +121,7 @@ public class MainActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(25, 25, 25, 25);
+        root.setPadding(20, 20, 20, 20);
         root.setBackgroundColor(Color.WHITE);
 
         TextView title = new TextView(this);
@@ -131,7 +129,7 @@ public class MainActivity extends Activity {
         title.setTextSize(30);
         title.setTextColor(Color.BLACK);
         title.setGravity(Gravity.CENTER);
-        title.setPadding(0, 20, 0, 20);
+        title.setPadding(0, 15, 0, 15);
 
         root.addView(title);
 
@@ -150,10 +148,10 @@ public class MainActivity extends Activity {
         root.addView(usageButton);
 
         TextView listTitle = new TextView(this);
-        listTitle.setText("📱 Installed Apps");
+        listTitle.setText("📱 All Installed Apps");
         listTitle.setTextSize(22);
         listTitle.setTextColor(Color.BLACK);
-        listTitle.setPadding(0, 25, 0, 10);
+        listTitle.setPadding(0, 20, 0, 10);
 
         root.addView(listTitle);
 
@@ -187,25 +185,64 @@ public class MainActivity extends Activity {
                         PackageManager.GET_META_DATA
                 );
 
+        Collections.sort(
+                apps,
+                new Comparator<ApplicationInfo>() {
+                    @Override
+                    public int compare(
+                            ApplicationInfo a,
+                            ApplicationInfo b) {
+
+                        return pm.getApplicationLabel(a)
+                                .toString()
+                                .compareToIgnoreCase(
+                                        pm.getApplicationLabel(b)
+                                                .toString()
+                                );
+                    }
+                }
+        );
+
         for (ApplicationInfo app : apps) {
 
-            if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            if (app.packageName.equals(getPackageName())) {
                 continue;
             }
 
             String packageName = app.packageName;
+            String appName =
+                    pm.getApplicationLabel(app).toString();
+
+            Drawable icon = pm.getApplicationIcon(app);
 
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(10, 10, 10, 10);
+            row.setPadding(10, 12, 10, 12);
+
+            ImageView appIcon = new ImageView(this);
+            appIcon.setImageDrawable(icon);
+
+            LinearLayout.LayoutParams iconParams =
+                    new LinearLayout.LayoutParams(60, 60);
+
+            row.addView(appIcon, iconParams);
 
             TextView name = new TextView(this);
-            name.setText(
-                    pm.getApplicationLabel(app).toString()
-            );
-            name.setTextSize(18);
+            name.setText(appName);
+            name.setTextSize(17);
             name.setTextColor(Color.BLACK);
+            name.setGravity(Gravity.CENTER_VERTICAL);
+            name.setPadding(15, 0, 10, 0);
+
+            row.addView(
+                    name,
+                    new LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            1
+                    )
+            );
 
             Button lockButton = new Button(this);
 
@@ -245,28 +282,16 @@ public class MainActivity extends Activity {
                             Toast.makeText(
                                     MainActivity.this,
                                     !current
-                                            ? name.getText()
-                                                + " locked"
-                                            : name.getText()
-                                                + " unlocked",
+                                            ? appName + " locked"
+                                            : appName + " unlocked",
                                     Toast.LENGTH_SHORT
                             ).show();
                         }
                     }
             );
 
-            row.addView(
-                    name,
-                    new LinearLayout.LayoutParams(
-                            0,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            1
-                    )
-            );
-
             row.addView(lockButton);
-
             appList.addView(row);
         }
     }
-                    }
+    }

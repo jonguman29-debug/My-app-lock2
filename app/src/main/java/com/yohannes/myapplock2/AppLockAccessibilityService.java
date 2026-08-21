@@ -8,7 +8,6 @@ import android.view.accessibility.AccessibilityEvent;
 public class AppLockAccessibilityService extends AccessibilityService {
 
     private SharedPreferences prefs;
-    private String lastPackage = "";
 
     @Override
     protected void onServiceConnected() {
@@ -32,53 +31,54 @@ public class AppLockAccessibilityService extends AccessibilityService {
             return;
         }
 
-        CharSequence packageName =
-                event.getPackageName();
+        CharSequence packageName = event.getPackageName();
 
         if (packageName == null) {
             return;
         }
 
-        String currentPackage =
-                packageName.toString();
+        String currentPackage = packageName.toString();
 
+        // Don't lock MyAppLock2 itself
         if (currentPackage.equals(getPackageName())) {
             return;
         }
 
-        if (currentPackage.equals(lastPackage)) {
-            return;
+        if (prefs == null) {
+            prefs = getSharedPreferences(
+                    "MyAppLock",
+                    MODE_PRIVATE
+            );
         }
-
-        lastPackage = currentPackage;
 
         boolean locked = prefs.getBoolean(
                 "LOCK_" + currentPackage,
                 false
         );
 
-        if (locked) {
-
-            Intent intent = new Intent(
-                    this,
-                    PinActivity.class
-            );
-
-            intent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP
-            );
-
-            intent.putExtra(
-                    "LOCKED_PACKAGE",
-                    currentPackage
-            );
-
-            startActivity(intent);
+        if (!locked) {
+            return;
         }
+
+        Intent intent = new Intent(
+                this,
+                PinActivity.class
+        );
+
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+        );
+
+        intent.putExtra(
+                "LOCKED_PACKAGE",
+                currentPackage
+        );
+
+        startActivity(intent);
     }
 
     @Override
     public void onInterrupt() {
     }
-  }
+}

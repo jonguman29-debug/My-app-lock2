@@ -20,6 +20,10 @@
 
         </activity>
 
+        <service
+            android:name=".LockService"
+            android:exported="false" />
+
     </application>
 
 </manifest>

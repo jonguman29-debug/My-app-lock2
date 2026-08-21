@@ -37,9 +37,10 @@ public class PinActivity extends Activity {
         title.setGravity(Gravity.CENTER);
 
         EditText pin = new EditText(this);
-        pin.setHint("Enter PIN");
+        pin.setHint("Enter 4-digit PIN");
         pin.setInputType(2);
         pin.setGravity(Gravity.CENTER);
+        pin.setTextSize(20);
 
         Button unlock = new Button(this);
         unlock.setText("🔓 Unlock");
@@ -59,7 +60,7 @@ public class PinActivity extends Activity {
             } else {
 
                 Toast.makeText(
-                        this,
+                        PinActivity.this,
                         "Wrong PIN",
                         Toast.LENGTH_SHORT
                 ).show();
@@ -70,23 +71,24 @@ public class PinActivity extends Activity {
 
         layout.addView(title);
 
-        LinearLayout.LayoutParams p =
+        LinearLayout.LayoutParams pinParams =
                 new LinearLayout.LayoutParams(
-                        600,
+                        LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        p.topMargin = 40;
-        layout.addView(pin, p);
+        pinParams.topMargin = 40;
+        layout.addView(pin, pinParams);
 
-        p = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams buttonParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
 
-        p.topMargin = 25;
-        layout.addView(unlock, p);
+        buttonParams.topMargin = 25;
+        layout.addView(unlock, buttonParams);
 
         setContentView(layout);
     }
-              }
+}

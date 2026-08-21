@@ -60,54 +60,44 @@ public class MainActivity extends Activity {
         Button save = new Button(this);
         save.setText("Save PIN");
 
-        save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        save.setOnClickListener(v -> {
 
-                String value = pin.getText().toString();
+            String value = pin.getText().toString();
 
-                if (value.length() != 4) {
-                    Toast.makeText(
-                        MainActivity.this,
-                        "PIN must be 4 digits",
-                        Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
+            if (value.length() != 4) {
+                Toast.makeText(
+                    MainActivity.this,
+                    "PIN must be 4 digits",
+                    Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
 
-                prefs.edit()
+            prefs.edit()
                     .putString("PIN", value)
                     .apply();
 
-                Toast.makeText(
-                    MainActivity.this,
-                    "PIN saved successfully!",
-                    Toast.LENGTH_SHORT
-                ).show();
-
-                showMainScreen();
-            }
+            showMainScreen();
         });
 
         layout.addView(title);
 
-        LinearLayout.LayoutParams pinParams =
-            new LinearLayout.LayoutParams(
-                500,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+        LinearLayout.LayoutParams p =
+                new LinearLayout.LayoutParams(
+                        500,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
 
-        pinParams.topMargin = 40;
-        layout.addView(pin, pinParams);
+        p.topMargin = 40;
+        layout.addView(pin, p);
 
-        LinearLayout.LayoutParams buttonParams =
-            new LinearLayout.LayoutParams(
+        p = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+        );
 
-        buttonParams.topMargin = 25;
-        layout.addView(save, buttonParams);
+        p.topMargin = 25;
+        layout.addView(save, p);
 
         setContentView(layout);
     }
@@ -132,9 +122,9 @@ public class MainActivity extends Activity {
         usageButton.setText("⚙️ Usage Access Settings");
 
         usageButton.setOnClickListener(v ->
-            startActivity(new Intent(
-                Settings.ACTION_USAGE_ACCESS_SETTINGS
-            ))
+                startActivity(new Intent(
+                        Settings.ACTION_USAGE_ACCESS_SETTINGS
+                ))
         );
 
         root.addView(usageButton);
@@ -153,13 +143,14 @@ public class MainActivity extends Activity {
         appList.setOrientation(LinearLayout.VERTICAL);
 
         scroll.addView(appList);
+
         root.addView(
-            scroll,
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1
-            )
+                scroll,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1
+                )
         );
 
         loadApps();
@@ -172,15 +163,17 @@ public class MainActivity extends Activity {
         PackageManager pm = getPackageManager();
 
         List<ApplicationInfo> apps =
-            pm.getInstalledApplications(
-                PackageManager.GET_META_DATA
-            );
+                pm.getInstalledApplications(
+                        PackageManager.GET_META_DATA
+                );
 
         for (ApplicationInfo app : apps) {
 
             if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 continue;
             }
+
+            String packageName = app.packageName;
 
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
@@ -189,32 +182,60 @@ public class MainActivity extends Activity {
 
             TextView name = new TextView(this);
             name.setText(
-                pm.getApplicationLabel(app).toString()
+                    pm.getApplicationLabel(app).toString()
             );
             name.setTextSize(18);
             name.setTextColor(Color.BLACK);
 
             Button lockButton = new Button(this);
-            lockButton.setText("🔒 Lock");
+
+            boolean locked =
+                    prefs.getBoolean(
+                            "LOCK_" + packageName,
+                            false
+                    );
+
+            lockButton.setText(
+                    locked ? "🔓 Unlock" : "🔒 Lock"
+            );
 
             lockButton.setOnClickListener(v -> {
 
-                lockButton.setText("🔓 Locked");
+                boolean current =
+                        prefs.getBoolean(
+                                "LOCK_" + packageName,
+                                false
+                        );
+
+                prefs.edit()
+                        .putBoolean(
+                                "LOCK_" + packageName,
+                                !current
+                        )
+                        .apply();
+
+                lockButton.setText(
+                        !current
+                                ? "🔓 Unlock"
+                                : "🔒 Lock"
+                );
 
                 Toast.makeText(
-                    MainActivity.this,
-                    name.getText() + " selected for locking",
-                    Toast.LENGTH_SHORT
+                        MainActivity.this,
+                        !current
+                                ? name.getText() + " locked"
+                                : name.getText() + " unlocked",
+                        Toast.LENGTH_SHORT
                 ).show();
             });
 
             row.addView(
-                name,
-                new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1
-                )
+                    name,
+                    new LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            1
+                    )
             );
 
             row.addView(lockButton);
@@ -222,4 +243,4 @@ public class MainActivity extends Activity {
             appList.addView(row);
         }
     }
-            }
+                     }
